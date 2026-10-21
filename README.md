@@ -42,6 +42,12 @@ APK 和 SHA-256 输出在 `dist/`。首次构建会在 `build/` 生成本地调�
 adb install -r dist/QPollLab-2.10-test1.apk
 ```
 
+### GitHub Actions 测试包
+
+不想在本机安装 Android SDK 时，可在 GitHub Actions 页面选择 `build-test-apk`，点击 `Run workflow`。构建完成后在该次运行的 Artifacts 中下载 `QPollLab-test-<run_number>`，内含 APK 和 SHA-256 文件。
+
+workflow 使用 `ubuntu-latest`、JDK 17、platform android-34 和 build-tools 34.0.0，不运行单元测试，也不创建 GitHub Release。测试签名密钥通过 Actions 缓存保留；缓存丢失时会生成新密钥，此时需要先卸载旧包再安装新包。
+
 ## 隐私
 
 本仓库仅包含 App 源码、测试、构建脚本、必要依赖与许可证。测试使用合成 UID，不包含原始手机日志、NFC 抓包或个人图片。
@@ -81,3 +87,4 @@ adb install -r dist/QPollLab-2.10-test1.apk
 - 接受已知的 `00120030FFFFFF` / `01120030FFFFFF` 扫描配置，并按读出的方向调整传输数据；其他规格校验仍然保留。写入前复核发现方向变化即停止，不传图。
 - 预览快照 SHA-256 与实际发送 SHA-256 分别记录；扫描方向转换发生在 D1 校验之后。只读检查仍可在未选择型号时执行，但不能据此识别 A0 / A1。
 - 全帧映射与参考打包函数逐字节比对通过，回归覆盖两种型号、两种扫描方向、实际 D3 数据、预览还原及未知选择拒绝；APK 构建和签名验证通过。尚未完成两种实物屏的刷新验证；此改动不解决 D1 返回 `6401` 的问题。
+- 新增临时类型 `A0X`（A0临时 · 左右半屏互换）：在 A0 交错布局上再交换左右各 276 列（各 52992 字节）半区，用于实测中左右两半顺序相反的实物屏；不影响 A0 / A1 的行为。
