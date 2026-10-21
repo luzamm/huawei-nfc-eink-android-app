@@ -16,8 +16,8 @@ public final class PanelTypeTest {
             for(int y=0;y<768;y++)for(int x=0;x<552;x++)require(preview[y*552+x]==ImageRaster.color(codes[y*552+x]),"logical preview round trip");
             // Independent direct pixel-to-wire oracle: invert target row numbering.
             for(int controller=0;controller<552;controller++) {
-                int target=type==PanelType.A0X?(controller+276)%552:controller;
-                int source=type==PanelType.A1?target:(target%2==0?target/2:551-target/2);
+                int source=type==PanelType.A1?controller:(controller%2==0?controller/2:551-controller/2);
+                if(type==PanelType.A0X)source=(source+276)%552;
                 int x=551-source;
                 for(int y=0;y<768;y+=4) {
                     int expected=0;for(int k=0;k<4;k++)expected|=codes[(y+k)*552+x]<<(6-2*k);

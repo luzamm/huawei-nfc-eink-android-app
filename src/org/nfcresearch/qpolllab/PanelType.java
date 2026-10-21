@@ -10,10 +10,11 @@ public enum PanelType {
         throw new IllegalArgumentException("请先选择屏幕类型 A0、A1 或 A0临时");
     }
     public byte[] pack(byte[] codes) {
-        byte[] packed=map(PanelProtocol.packCodes(codes,PanelProtocol.WIDTH,PanelProtocol.HEIGHT),false);
-        return this==A0X?swapHalves(packed):packed;
+        byte[] raw=PanelProtocol.packCodes(codes,PanelProtocol.WIDTH,PanelProtocol.HEIGHT);
+        if(this==A0X)raw=swapHalves(raw);
+        return map(raw,false);
     }
-    /** Temporary physical variant: A0 layout with the two 276-column halves exchanged. */
+    /** Temporary variant: swap the logical left/right image halves before the A0 layout. */
     private static byte[] swapHalves(byte[] data) {
         if(data.length!=PanelProtocol.IMAGE_BYTES)throw new IllegalArgumentException("屏幕数据长度错误");
         int half=PanelProtocol.WIDTH/2*(PanelProtocol.HEIGHT/4);
@@ -35,12 +36,14 @@ public enum PanelType {
         return out;
     }
     public int[] preview(byte[] packed) {
-        byte[] data=this==A0X?swapHalves(packed):packed;
-        return ImageRaster.preview(map(data,true),PanelProtocol.WIDTH,PanelProtocol.HEIGHT);
+        byte[] data=map(packed,true);
+        if(this==A0X)data=swapHalves(data);
+        return ImageRaster.preview(data,PanelProtocol.WIDTH,PanelProtocol.HEIGHT);
     }
     public int[] preview(byte[] packed,int[] palette) {
-        byte[] data=this==A0X?swapHalves(packed):packed;
-        return ImageRaster.preview(map(data,true),PanelProtocol.WIDTH,PanelProtocol.HEIGHT,palette);
+        byte[] data=map(packed,true);
+        if(this==A0X)data=swapHalves(data);
+        return ImageRaster.preview(data,PanelProtocol.WIDTH,PanelProtocol.HEIGHT,palette);
     }
     /** Stored scan 00 uses bottom-up pixels; scan 01 uses top-down pixels in each row. */
     public static byte[] forScan(byte[] packed,boolean topDown) {
